@@ -101,8 +101,8 @@ cd solemne1_jose_soto
 Instala las dependencias:
 ```
 pip install -r requirements.txt
-Asegúrate de tener configuradas tus credenciales de Google Cloud para BigQuery (archivos JSON o variables de entorno, según tu configuración).
 ```
+Asegúrate de tener configuradas tus credenciales de Google Cloud para BigQuery (archivos JSON o variables de entorno, según tu configuración).
 Más detalles en Autenticación de BigQuery.
 
 Agrega tu clave de OpenWeather API (por ejemplo, definiendo una variable de entorno OPENWEATHER_API_KEY o usando un archivo local con la clave).
@@ -110,8 +110,9 @@ Agrega tu clave de OpenWeather API (por ejemplo, definiendo una variable de ento
 Ejecuta el notebook:
 ```
 jupyter notebook solemne1_jose_soto.ipynb
-Sigue las celdas en orden:
 ```
+Sigue las celdas en orden:
+
 Conexión a BigQuery y consultas.
 
 Análisis de datos, limpiezas y transformaciones.
