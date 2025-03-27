@@ -88,29 +88,30 @@ Gráficos de línea para observar tendencias en el tiempo en regiones específic
 ├── README.md                            # Descripción del proyecto
 ├── requirements.txt                     # Dependencias del proyecto
 
-
+```
 ---
 
 ## ▶️ Cómo usar este repositorio
 
 Clona este repositorio:
-
+```
 git clone https://github.com/tu_usuario/solemne1_jose_soto.git
 cd solemne1_jose_soto
+```
 Instala las dependencias:
-
+```
 pip install -r requirements.txt
 Asegúrate de tener configuradas tus credenciales de Google Cloud para BigQuery (archivos JSON o variables de entorno, según tu configuración).
-
+```
 Más detalles en Autenticación de BigQuery.
 
 Agrega tu clave de OpenWeather API (por ejemplo, definiendo una variable de entorno OPENWEATHER_API_KEY o usando un archivo local con la clave).
 
 Ejecuta el notebook:
-
+```
 jupyter notebook solemne1_jose_soto.ipynb
 Sigue las celdas en orden:
-
+```
 Conexión a BigQuery y consultas.
 
 Análisis de datos, limpiezas y transformaciones.
@@ -132,10 +133,10 @@ Cuenta y credenciales configuradas para Google Cloud BigQuery (si ejecutas local
 
 Clave de la OpenWeather API para extraer datos climáticos.
 Instala las dependencias necesarias:
-
+```
 pip install -r requirements.txt
 
-
+```
 ---
 
 ## 🧠 Autor
