@@ -1,0 +1,282 @@
+<script>
+  const STEP_MINUTES = 30;
+  const state = {
+    rooms: [],
+    minHour: '08:30',
+    maxHour: '22:00',
+    currentDate: new Date().toISOString().slice(0, 10),
+    schedule: [],
+    startSlots: [],
+    endSlots: []
+  };
+
+  function init() {
+    document.getElementById('datePicker').addEventListener('change', onDateChange);
+    document.getElementById('refreshButton').addEventListener('click', () => loadSchedule(state.currentDate));
+    document.getElementById('bookingForm').addEventListener('submit', onSubmit);
+    document.getElementById('showFreeRooms').addEventListener('click', showFreeRooms);
+    document.getElementById('startTime').addEventListener('change', onStartTimeChange);
+    document.getElementById('fullDayToggle').addEventListener('change', onFullDayToggle);
+
+    google.script.run.withSuccessHandler(setInitialData).getInitialData();
+  }
+
+  function setInitialData(data) {
+    state.rooms = data.rooms;
+    state.minHour = data.minHour;
+    state.maxHour = data.maxHour;
+
+    const roomSelect = document.getElementById('roomSelect');
+    roomSelect.innerHTML = data.rooms.map(room => `<option value="${room}">Sala ${room}</option>`).join('');
+
+    const datePicker = document.getElementById('datePicker');
+    datePicker.value = state.currentDate;
+    setDateLimits(datePicker);
+
+    initializeTimeSelectors();
+    resetFormDefaults();
+
+    loadSchedule(state.currentDate);
+  }
+
+  function initializeTimeSelectors() {
+    state.startSlots = generateStartSlots(state.minHour, state.maxHour, STEP_MINUTES);
+    state.endSlots = generateEndSlots(state.minHour, state.maxHour, STEP_MINUTES);
+    const startSelect = document.getElementById('startTime');
+    const endSelect = document.getElementById('endTime');
+    populateSelect(startSelect, state.startSlots, state.startSlots[0]);
+    updateEndOptions(state.startSlots[0]);
+    endSelect.value = state.endSlots[0];
+  }
+
+  function setDateLimits(input) {
+    const today = new Date();
+    const minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const maxDate = new Date(minDate);
+    maxDate.setDate(maxDate.getDate() + 30);
+    input.min = minDate.toISOString().slice(0, 10);
+    input.max = maxDate.toISOString().slice(0, 10);
+  }
+
+  function onDateChange(event) {
+    state.currentDate = event.target.value;
+    loadSchedule(state.currentDate);
+  }
+
+  function loadSchedule(date) {
+    google.script.run
+      .withSuccessHandler(renderSchedule)
+      .withFailureHandler(showError)
+      .getScheduleForDate(date);
+  }
+
+  function renderSchedule(rows) {
+    state.schedule = rows;
+    const container = document.getElementById('scheduleTable');
+    if (!rows.length) {
+      container.innerHTML = '<p>No hay reservas para este día.</p>';
+      return;
+    }
+    const rowsHtml = rows
+      .sort((a, b) => a.sala.localeCompare(b.sala) || a.inicio.localeCompare(b.inicio))
+      .map(item => `
+        <tr>
+          <td>Sala ${item.sala}</td>
+          <td>${item.inicio}</td>
+          <td>${item.fin}</td>
+          <td>${item.uso}</td>
+          <td>${item.responsable}</td>
+        </tr>
+      `)
+      .join('');
+    container.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Sala</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Uso</th>
+            <th>Responsable</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    `;
+  }
+
+  function onSubmit(event) {
+    event.preventDefault();
+    const fullDay = document.getElementById('fullDayToggle').checked;
+    const startSelect = document.getElementById('startTime');
+    const endSelect = document.getElementById('endTime');
+    const booking = {
+      date: state.currentDate,
+      room: document.getElementById('roomSelect').value,
+      usage: document.getElementById('usageInput').value.trim(),
+      owner: document.getElementById('ownerInput').value.trim(),
+      startTime: fullDay ? state.minHour : startSelect.value,
+      endTime: fullDay ? state.maxHour : endSelect.value,
+      fullDay
+    };
+
+    const message = document.getElementById('formMessage');
+    message.textContent = '';
+    message.className = 'message';
+
+    google.script.run
+      .withSuccessHandler(rows => {
+        renderSchedule(rows);
+        message.textContent = 'Reserva creada correctamente.';
+        message.classList.add('success');
+        resetFormDefaults({
+          room: booking.room,
+          startTime: booking.startTime,
+          endTime: booking.endTime,
+          fullDay
+        });
+      })
+      .withFailureHandler(error => {
+        message.textContent = error.message || 'No se pudo crear la reserva.';
+        message.classList.add('error');
+      })
+      .addBooking(booking);
+  }
+
+  function showFreeRooms() {
+    google.script.run
+      .withSuccessHandler(renderFreeRooms)
+      .withFailureHandler(showError)
+      .getFreeRooms(state.currentDate);
+  }
+
+  function onStartTimeChange(event) {
+    if (document.getElementById('fullDayToggle').checked) {
+      return;
+    }
+    updateEndOptions(event.target.value, true);
+  }
+
+  function onFullDayToggle(event) {
+    setFullDayState(event.target.checked);
+  }
+
+  function setFullDayState(isFullDay) {
+    const startSelect = document.getElementById('startTime');
+    const endSelect = document.getElementById('endTime');
+    startSelect.disabled = isFullDay;
+    endSelect.disabled = isFullDay;
+    if (isFullDay) {
+      startSelect.value = state.minHour;
+      endSelect.value = state.maxHour;
+    } else {
+      if (!startSelect.value) {
+        startSelect.value = state.startSlots[0];
+      }
+      updateEndOptions(startSelect.value, true);
+    }
+  }
+
+  function resetFormDefaults(options = {}) {
+    const form = document.getElementById('bookingForm');
+    form.reset();
+    const roomSelect = document.getElementById('roomSelect');
+    if (options.room) {
+      roomSelect.value = options.room;
+    } else if (state.rooms.length) {
+      roomSelect.value = state.rooms[0];
+    }
+    const startSelect = document.getElementById('startTime');
+    const endSelect = document.getElementById('endTime');
+    if (!state.startSlots.length || !state.endSlots.length) {
+      initializeTimeSelectors();
+    } else {
+      const preferredStart = options.startTime && state.startSlots.includes(options.startTime)
+        ? options.startTime
+        : state.startSlots[0];
+      populateSelect(startSelect, state.startSlots, preferredStart);
+      updateEndOptions(preferredStart, false, options.endTime);
+    }
+    const toggle = document.getElementById('fullDayToggle');
+    toggle.checked = Boolean(options.fullDay);
+    setFullDayState(toggle.checked);
+    document.getElementById('usageInput').value = '';
+    document.getElementById('ownerInput').value = '';
+  }
+
+  function generateStartSlots(minHour, maxHour, stepMinutes) {
+    const startMinutes = toMinutes(minHour);
+    const endMinutes = toMinutes(maxHour);
+    const slots = [];
+    for (let minutes = startMinutes; minutes < endMinutes; minutes += stepMinutes) {
+      slots.push(toTimeString(minutes));
+    }
+    return slots;
+  }
+
+  function generateEndSlots(minHour, maxHour, stepMinutes) {
+    const startMinutes = toMinutes(minHour) + stepMinutes;
+    const endMinutes = toMinutes(maxHour);
+    const slots = [];
+    for (let minutes = startMinutes; minutes <= endMinutes; minutes += stepMinutes) {
+      slots.push(toTimeString(minutes));
+    }
+    return slots;
+  }
+
+  function toMinutes(timeString) {
+    const [hours, minutes] = timeString.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+
+  function toTimeString(totalMinutes) {
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+    const minutes = String(totalMinutes % 60).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  }
+
+  function populateSelect(select, options, selectedValue) {
+    select.innerHTML = options
+      .map(time => `<option value="${time}">${time}</option>`)
+      .join('');
+    if (selectedValue && options.includes(selectedValue)) {
+      select.value = selectedValue;
+    } else if (options.length) {
+      select.value = options[0];
+    }
+  }
+
+  function updateEndOptions(startValue, preserveSelection = false, preferredValue) {
+    const endSelect = document.getElementById('endTime');
+    const previous = endSelect.value;
+    const validOptions = state.endSlots.filter(time => toMinutes(time) > toMinutes(startValue));
+    const selection = preserveSelection ? previous : preferredValue;
+    populateSelect(endSelect, validOptions, selection);
+  }
+
+  function renderFreeRooms(rooms) {
+    const container = document.getElementById('freeRoomsList');
+    if (!rooms.length) {
+      container.innerHTML = '<p>No hay datos disponibles.</p>';
+      return;
+    }
+    container.innerHTML = rooms.map(room => {
+      const slots = room.available.length
+        ? room.available.map(slot => `<span class="slot">${slot.start} - ${slot.end}</span>`).join(' ')
+        : '<span class="slot empty">Sin disponibilidad</span>';
+      return `
+        <div class="room-card">
+          <h3>Sala ${room.room}</h3>
+          <div class="slot-list">${slots}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function showError(error) {
+    const container = document.getElementById('scheduleTable');
+    container.innerHTML = `<p class="message error">${error.message || 'Ocurrió un error inesperado.'}</p>`;
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>

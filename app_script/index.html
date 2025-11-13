@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <title>Gestor de Salas</title>
+    <?!= include('styles'); ?>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Gestor de uso de salas</h1>
+        <div class="controls">
+          <label>
+            Día:
+            <input type="date" id="datePicker" min="" max="">
+          </label>
+          <button id="refreshButton" class="secondary">Actualizar</button>
+        </div>
+      </header>
+      <main>
+        <section class="form-section">
+          <h2>Registrar uso de sala</h2>
+          <form id="bookingForm">
+            <div class="field-group">
+              <label for="roomSelect">Sala</label>
+              <select id="roomSelect" required></select>
+            </div>
+            <div class="field-group">
+              <label for="usageInput">Uso</label>
+              <input id="usageInput" type="text" placeholder="Ej: Ensayo PSU" required>
+            </div>
+            <div class="field-group">
+              <label for="ownerInput">Responsable</label>
+              <input id="ownerInput" type="text" placeholder="Nombre del responsable" required>
+            </div>
+            <div class="field-group toggle-group">
+              <label class="checkbox">
+                <input id="fullDayToggle" type="checkbox">
+                <span>Inhabilitar sala por el día completo</span>
+              </label>
+            </div>
+            <div class="field-group time-group">
+              <label>Horario</label>
+              <div class="time-inputs">
+                <select id="startTime" required></select>
+                <span>a</span>
+                <select id="endTime" required></select>
+              </div>
+            </div>
+            <button class="primary" type="submit">Guardar</button>
+          </form>
+          <div id="formMessage" class="message" role="alert"></div>
+        </section>
+        <section class="schedule-section">
+          <h2>Horario del día</h2>
+          <div id="scheduleTable" class="schedule-table"></div>
+        </section>
+        <section class="availability-section">
+          <h2>Salas libres</h2>
+          <button id="showFreeRooms" class="secondary">Ver salas libres</button>
+          <div id="freeRoomsList" class="free-rooms"></div>
+        </section>
+      </main>
+    </div>
+    <?!= include('scripts'); ?>
+  </body>
+</html>
