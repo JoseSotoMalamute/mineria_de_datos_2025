@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <base target="_top" />
+    <meta charset="utf-8" />
+    <title>Amigo Secreto</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --primary: #c62828;
+        --secondary: #1b5e20;
+        --accent: #f9a825;
+        --bg: #f3ede0;
+        --bg-overlay: rgba(255, 255, 255, 0.85);
+        --text: #231f20;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.6), transparent 55%),
+          radial-gradient(circle at bottom right, rgba(255, 255, 255, 0.45), transparent 60%),
+          linear-gradient(180deg, #103a2f 0%, #184d35 35%, #2a2a2a 100%);
+        color: var(--text);
+        font-size: 18px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      body::before,
+      body::after {
+        content: '';
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.28) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.25;
+        animation: snowfall 12s linear infinite;
+        z-index: 0;
+      }
+
+      body::after {
+        background-size: 60px 60px;
+        opacity: 0.15;
+        animation-duration: 18s;
+      }
+
+      @keyframes snowfall {
+        from {
+          transform: translateY(-20px);
+        }
+        to {
+          transform: translateY(20px);
+        }
+      }
+
+      header {
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(140deg, rgba(198, 40, 40, 0.95), rgba(27, 94, 32, 0.92));
+        color: #fff;
+        padding: 3.5rem 1.5rem 3rem;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+      }
+
+      header::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url('https://www.gstatic.com/webp/gallery3/1.png') repeat;
+        opacity: 0.05;
+        mix-blend-mode: screen;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      header > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      header h1 {
+        margin: 0 0 0.5rem 0;
+        font-size: 3rem;
+        letter-spacing: 1.5px;
+        text-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      }
+
+      header p {
+        margin: 0.35rem 0;
+        font-size: 1.2rem;
+      }
+
+      .countdown {
+        font-size: 2.6rem;
+        font-weight: 700;
+        margin-top: 1.25rem;
+        color: #fffef8;
+        text-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+      }
+
+      main {
+        flex: 1;
+        padding: 3rem 1.5rem 4rem;
+        max-width: 1100px;
+        margin: 0 auto;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+      }
+
+      main::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: rgba(243, 237, 224, 0.1);
+        filter: blur(80px);
+        z-index: -1;
+      }
+
+      section {
+        background: var(--bg-overlay);
+        border-radius: 22px;
+        padding: 2.5rem;
+        margin-bottom: 2.5rem;
+        box-shadow: 0 25px 55px rgba(0, 0, 0, 0.18);
+        backdrop-filter: blur(4px);
+      }
+
+      h2 {
+        margin-top: 0;
+        color: var(--primary);
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      h2::before {
+        content: '🎄';
+        font-size: 2.2rem;
+      }
+
+      p {
+        line-height: 1.6;
+        margin-top: 0;
+      }
+
+      form label {
+        display: block;
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        font-size: 1.05rem;
+      }
+
+      form input[type='text'],
+      form input[type='email'],
+      form input[type='password'],
+      form input[type='url'],
+      form input[type='datetime-local'],
+      form textarea {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        margin-bottom: 1.15rem;
+        border-radius: 12px;
+        border: 2px solid rgba(27, 94, 32, 0.15);
+        font-size: 1.05rem;
+        background: rgba(255, 255, 255, 0.9);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      form input[type='file'] {
+        width: 100%;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+      }
+
+      form input:focus,
+      form textarea:focus {
+        outline: none;
+        border-color: var(--secondary);
+        box-shadow: 0 0 0 4px rgba(27, 94, 32, 0.15);
+      }
+
+      .field-note {
+        display: block;
+        font-size: 0.85rem;
+        color: rgba(35, 31, 32, 0.75);
+        margin-top: -0.4rem;
+        margin-bottom: 1rem;
+      }
+
+      .gift-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .gift-card {
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 18px;
+        padding: 1.5rem;
+        border: 1px solid rgba(198, 40, 40, 0.15);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 12px 26px rgba(0, 0, 0, 0.12);
+        position: relative;
+      }
+
+      .gift-card h3 {
+        margin-top: 0;
+        font-size: 1.4rem;
+        color: var(--secondary);
+      }
+
+      .gift-card h3::after {
+        content: '✨';
+        margin-left: 0.5rem;
+      }
+
+      button,
+      .button-link {
+        appearance: none;
+        border: none;
+        background: linear-gradient(135deg, var(--primary), #8e0000);
+        color: #fff;
+        padding: 0.95rem 2.25rem;
+        font-size: 1.05rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s;
+        box-shadow: 0 14px 30px rgba(198, 40, 40, 0.35);
+      }
+
+      button.secondary,
+      .button-link.secondary {
+        background: linear-gradient(135deg, var(--secondary), #0d3f1a);
+        box-shadow: 0 14px 30px rgba(27, 94, 32, 0.35);
+      }
+
+      button.outline {
+        background: transparent;
+        color: var(--primary);
+        border: 3px solid var(--primary);
+        box-shadow: none;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      button:hover:not(:disabled),
+      .button-link:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      }
+
+      .message {
+        padding: 1.25rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        display: none;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .message.success {
+        background: rgba(27, 94, 32, 0.12);
+        color: #0d3f1a;
+        display: block;
+      }
+
+      .message.error {
+        background: rgba(198, 40, 40, 0.12);
+        color: #7a111d;
+        display: block;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1.25rem;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+
+      table th,
+      table td {
+        padding: 0.95rem 1rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        text-align: left;
+        font-size: 1rem;
+      }
+
+      table th {
+        background: rgba(198, 40, 40, 0.12);
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .admin-section {
+        display: none;
+      }
+
+      .admin-section.active {
+        display: block;
+        animation: fadeIn 0.35s ease;
+      }
+
+      .admin-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1.25rem;
+        align-items: flex-end;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(249, 168, 37, 0.18);
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+
+      .admin-auth-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        margin-bottom: 1rem;
+      }
+
+      footer {
+        text-align: center;
+        padding: 1.75rem 1rem 2.5rem;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.95rem;
+        position: relative;
+        z-index: 1;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 768px) {
+        header h1 {
+          font-size: 2.4rem;
+        }
+
+        .countdown {
+          font-size: 2.1rem;
+        }
+
+        section {
+          padding: 2rem;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          font-size: 16px;
+        }
+
+        .gift-group {
+          grid-template-columns: 1fr;
+        }
+
+        section {
+          padding: 1.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Amigo Secreto Navideño</h1>
+      <p>Inscríbete, comparte tus ideas de regalo y prepárate para la magia del sorteo 🎁</p>
+      <div id="countdown" class="countdown">Cuenta regresiva pendiente...</div>
+    </header>
+
+    <main>
+      <section>
+        <h2>Registro de participantes</h2>
+        <p>Completa tus datos y comparte tres ideas de regalo de aproximadamente $20.000 CLP cada una, con su enlace de compra y una foto subida desde tu dispositivo.</p>
+        <div id="participant-message" class="message"></div>
+        <form id="participant-form">
+          <label for="name">Nombre completo (opcional)</label>
+          <input type="text" id="name" name="name" placeholder="Ej: Ana Pérez" />
+
+          <label for="email">Correo electrónico *</label>
+          <input type="email" id="email" name="email" placeholder="Ej: ana@mail.com" required />
+
+          <div class="gift-group">
+            <div class="gift-card">
+              <h3>Opción 1</h3>
+              <label for="gift1-title">Descripción</label>
+              <input type="text" id="gift1-title" required placeholder="Caja de chocolates artesanales" />
+              <label for="gift1-url">Enlace del producto</label>
+              <input type="url" id="gift1-url" placeholder="https://" />
+              <label for="gift1-image">Foto del regalo</label>
+              <input type="file" id="gift1-image" accept="image/*" />
+              <p class="field-note">Formatos JPG/PNG, máximo 5 MB.</p>
+            </div>
+            <div class="gift-card">
+              <h3>Opción 2</h3>
+              <label for="gift2-title">Descripción</label>
+              <input type="text" id="gift2-title" required placeholder="Libro favorito" />
+              <label for="gift2-url">Enlace del producto</label>
+              <input type="url" id="gift2-url" placeholder="https://" />
+              <label for="gift2-image">Foto del regalo</label>
+              <input type="file" id="gift2-image" accept="image/*" />
+              <p class="field-note">Formatos JPG/PNG, máximo 5 MB.</p>
+            </div>
+            <div class="gift-card">
+              <h3>Opción 3</h3>
+              <label for="gift3-title">Descripción</label>
+              <input type="text" id="gift3-title" required placeholder="Taza personalizada" />
+              <label for="gift3-url">Enlace del producto</label>
+              <input type="url" id="gift3-url" placeholder="https://" />
+              <label for="gift3-image">Foto del regalo</label>
+              <input type="file" id="gift3-image" accept="image/*" />
+              <p class="field-note">Formatos JPG/PNG, máximo 5 MB.</p>
+            </div>
+          </div>
+
+          <button type="submit">Guardar participación</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Panel del administrador</h2>
+        <p class="badge">Solo <strong><?!= adminEmail ?></strong> puede ejecutar el sorteo.</p>
+        <div id="admin-message" class="message"></div>
+        <form id="admin-verify-form">
+          <div class="admin-auth-grid">
+            <div>
+              <label for="admin-email">Correo de administrador</label>
+              <input type="email" id="admin-email" placeholder="<?!= adminEmail ?>" required />
+            </div>
+            <div>
+              <label for="admin-password">Contraseña de administrador</label>
+              <input type="password" id="admin-password" placeholder="Ingresa tu contraseña" required />
+            </div>
+          </div>
+          <button type="submit" class="secondary">Validar acceso</button>
+        </form>
+
+        <div id="admin-section" class="admin-section">
+          <div class="admin-actions">
+            <form id="countdown-form">
+              <label for="countdown-input">Fecha y hora límite del sorteo</label>
+              <input type="datetime-local" id="countdown-input" required />
+              <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+                <button type="submit" class="secondary">Actualizar cuenta regresiva</button>
+                <button type="button" id="clear-countdown" class="outline">Eliminar cuenta regresiva</button>
+              </div>
+            </form>
+            <button id="run-draw">Ejecutar sorteo</button>
+          </div>
+
+          <div id="last-results" style="margin-top:1.5rem;"></div>
+
+          <h3 style="margin-top:2rem;">Participantes registrados</h3>
+          <div id="participant-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      &copy; <?!= (new Date()).getFullYear(); ?> | Organización Amigo Secreto
+    </footer>
+
+    <script>
+      const ADMIN_EMAIL = '<?!= adminEmail ?>';
+      let countdownInterval = null;
+      let adminVerified = false;
+      let adminIdentity = null;
+
+      document.getElementById('participant-form').addEventListener('submit', handleParticipantSubmit);
+
+      async function handleParticipantSubmit(event) {
+        event.preventDefault();
+        const button = event.target.querySelector('button[type="submit"]');
+        button.disabled = true;
+        toggleParticipantMessage('Procesando registro...', 'success');
+
+        let data;
+        try {
+          data = await collectParticipantData();
+        } catch (error) {
+          button.disabled = false;
+          toggleParticipantMessage(error.message || 'Revisa la información ingresada.', 'error');
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            button.disabled = false;
+            if (response && response.success) {
+              toggleParticipantMessage(response.message, 'success');
+              event.target.reset();
+              if (adminVerified) {
+                loadParticipants();
+              }
+            } else {
+              toggleParticipantMessage('No se pudo guardar el registro.', 'error');
+            }
+          })
+          .withFailureHandler(function (error) {
+            button.disabled = false;
+            toggleParticipantMessage(error.message || 'Ocurrió un error al guardar el registro.', 'error');
+          })
+          .registerParticipant(data);
+      }
+
+      document.getElementById('admin-verify-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const emailInput = document.getElementById('admin-email');
+        const passwordInput = document.getElementById('admin-password');
+        const email = (emailInput.value || '').trim();
+        const password = (passwordInput.value || '').trim();
+        if (!email) {
+          toggleAdminMessage('Debes ingresar tu correo de administrador.', 'error');
+          return;
+        }
+
+        if (!password) {
+          toggleAdminMessage('Debes ingresar la contraseña de administrador.', 'error');
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(function (isValid) {
+            if (isValid) {
+              adminVerified = true;
+              adminIdentity = {
+                email: email,
+                password: password
+              };
+              passwordInput.value = '';
+              document.getElementById('admin-section').classList.add('active');
+              toggleAdminMessage('Acceso de administrador habilitado.', 'success');
+              loadParticipants();
+              loadCountdown(true);
+              loadLastResults();
+            } else {
+              adminVerified = false;
+              adminIdentity = null;
+              document.getElementById('admin-section').classList.remove('active');
+              toggleAdminMessage('Las credenciales ingresadas no son válidas.', 'error');
+            }
+          })
+          .withFailureHandler(function (error) {
+            toggleAdminMessage(error.message || 'No se pudo validar el acceso de administrador.', 'error');
+          })
+          .validateAdmin({
+            email: email,
+            password: password
+          });
+      });
+
+      document.getElementById('countdown-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (!adminVerified) {
+          toggleAdminMessage('Debes validar tu acceso de administrador primero.', 'error');
+          return;
+        }
+
+        const input = document.getElementById('countdown-input');
+        const value = input.value;
+        if (!value) {
+          toggleAdminMessage('Selecciona una fecha y hora válidas.', 'error');
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            toggleAdminMessage(response.message, 'success');
+            loadCountdown();
+          })
+          .withFailureHandler(function (error) {
+            toggleAdminMessage(error.message || 'No se pudo configurar la cuenta regresiva.', 'error');
+          })
+          .setCountdownConfig(value, adminIdentity);
+      });
+
+      document.getElementById('clear-countdown').addEventListener('click', function () {
+        if (!adminVerified) {
+          toggleAdminMessage('Debes validar tu acceso de administrador primero.', 'error');
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            toggleAdminMessage(response.message, 'success');
+            loadCountdown();
+          })
+          .withFailureHandler(function (error) {
+            toggleAdminMessage(error.message || 'No se pudo eliminar la cuenta regresiva.', 'error');
+          })
+          .setCountdownConfig('', adminIdentity);
+      });
+
+      document.getElementById('run-draw').addEventListener('click', function () {
+        if (!adminVerified) {
+          toggleAdminMessage('Debes validar tu acceso de administrador primero.', 'error');
+          return;
+        }
+
+        if (!confirm('¿Confirmas que deseas ejecutar el sorteo? Se enviarán correos a todos los participantes.')) {
+          return;
+        }
+
+        const button = this;
+        button.disabled = true;
+        toggleAdminMessage('Ejecutando sorteo y enviando correos...', 'success');
+
+        google.script.run
+          .withSuccessHandler(function (response) {
+            button.disabled = false;
+            if (response && response.success) {
+              toggleAdminMessage(response.message, 'success');
+              loadLastResults();
+            } else {
+              toggleAdminMessage('No se pudo completar el sorteo.', 'error');
+            }
+          })
+          .withFailureHandler(function (error) {
+            button.disabled = false;
+            toggleAdminMessage(error.message || 'Error al ejecutar el sorteo.', 'error');
+          })
+          .runSecretSanta(adminIdentity);
+      });
+
+      async function collectParticipantData() {
+        const name = (document.getElementById('name').value || '').trim();
+        const email = (document.getElementById('email').value || '').trim();
+
+        if (!email) {
+          throw new Error('Debes ingresar un correo electrónico válido.');
+        }
+
+        const gifts = [];
+        for (let index = 1; index <= 3; index++) {
+          const title = (document.getElementById('gift' + index + '-title').value || '').trim();
+          const url = (document.getElementById('gift' + index + '-url').value || '').trim();
+          if (!title) {
+            throw new Error('Debes completar la descripción de la opción ' + index + '.');
+          }
+
+          const fileInput = document.getElementById('gift' + index + '-image');
+          const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+          let image = null;
+
+          if (file) {
+            if (file.type && !file.type.startsWith('image/')) {
+              throw new Error('La opción ' + index + ' debe tener una imagen válida.');
+            }
+
+            const maxBytes = 5 * 1024 * 1024;
+            if (file.size && file.size > maxBytes) {
+              throw new Error('La imagen de la opción ' + index + ' supera los 5 MB permitidos.');
+            }
+
+            const base64 = await readFileAsBase64(file);
+            image = {
+              name: file.name,
+              type: file.type || 'image/png',
+              data: base64
+            };
+          }
+
+          gifts.push({
+            title: title,
+            url: url,
+            image: image
+          });
+        }
+
+        return {
+          name: name,
+          email: email.toLowerCase(),
+          gifts: gifts
+        };
+      }
+
+      function readFileAsBase64(file) {
+        return new Promise(function (resolve, reject) {
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const result = event.target && event.target.result ? event.target.result : '';
+            const parts = result.split(',');
+            if (parts.length < 2) {
+              reject(new Error('No se pudo leer la imagen seleccionada.'));
+              return;
+            }
+            resolve(parts[1]);
+          };
+          reader.onerror = function () {
+            reject(new Error('No se pudo leer la imagen seleccionada.'));
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function toggleParticipantMessage(message, type) {
+        const element = document.getElementById('participant-message');
+        element.textContent = message;
+        element.className = 'message ' + (type || '');
+        element.style.display = 'block';
+        if (type === 'success') {
+          setTimeout(function () {
+            element.style.display = 'none';
+          }, 4000);
+        }
+      }
+
+      function toggleAdminMessage(message, type) {
+        const element = document.getElementById('admin-message');
+        element.textContent = message;
+        element.className = 'message ' + (type || '');
+        element.style.display = 'block';
+      }
+
+      function loadCountdown(fillInput) {
+        google.script.run
+          .withSuccessHandler(function (config) {
+            if (fillInput) {
+              populateCountdownInput(config);
+            }
+            startCountdown(config ? config.targetIso : null);
+          })
+          .withFailureHandler(function () {
+            startCountdown(null);
+          })
+          .getCountdownConfig();
+      }
+
+      function populateCountdownInput(config) {
+        const input = document.getElementById('countdown-input');
+        if (config && config.targetIso) {
+          const target = new Date(config.targetIso);
+          if (!isNaN(target.getTime())) {
+            const tzOffset = target.getTimezoneOffset();
+            const localDate = new Date(target.getTime() - tzOffset * 60000);
+            input.value = localDate.toISOString().slice(0, 16);
+            return;
+          }
+        }
+        input.value = '';
+      }
+
+      function startCountdown(targetIso) {
+        const container = document.getElementById('countdown');
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+        }
+
+        if (!targetIso) {
+          container.textContent = 'Cuenta regresiva pendiente...';
+          return;
+        }
+
+        function updateCountdown() {
+          const now = new Date();
+          const target = new Date(targetIso);
+          const diff = target.getTime() - now.getTime();
+
+          if (isNaN(target.getTime()) || diff <= 0) {
+            container.textContent = '¡El sorteo puede realizarse en cualquier momento!';
+            clearInterval(countdownInterval);
+            return;
+          }
+
+          const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+          const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+          const minutes = Math.floor((diff / (1000 * 60)) % 60);
+          const seconds = Math.floor((diff / 1000) % 60);
+
+          container.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        updateCountdown();
+        countdownInterval = setInterval(updateCountdown, 1000);
+      }
+
+      function loadParticipants() {
+        if (!adminVerified) {
+          document.getElementById('participant-list').innerHTML = '';
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(renderParticipantTable)
+          .withFailureHandler(function (error) {
+            document.getElementById('participant-list').innerHTML =
+              '<p>No se pudieron cargar los participantes: ' + (error.message || 'Error desconocido') + '</p>';
+          })
+          .listParticipants(adminIdentity);
+      }
+
+      function renderParticipantTable(participants) {
+        if (!participants || !participants.length) {
+          document.getElementById('participant-list').innerHTML = '<p>Aún no hay participantes inscritos.</p>';
+          return;
+        }
+
+        const rows = participants
+          .map(function (participant) {
+            const giftItems = participant.gifts
+              .map(function (gift, index) {
+                const parts = [`<strong>${index + 1}.</strong> ${gift.title}`];
+                if (gift.url) {
+                  parts.push(` (<a href="${gift.url}" target="_blank" rel="noopener noreferrer">link</a>)`);
+                }
+                if (gift.imageUrl) {
+                  parts.push(
+                    `<br><img src="${gift.imageUrl}" alt="Foto opción ${index + 1}" style="max-width:140px; border-radius:12px; margin-top:0.5rem;" />`
+                  );
+                }
+                if (gift.driveUrl) {
+                  parts.push(
+                    `<br><a href="${gift.driveUrl}" target="_blank" rel="noopener noreferrer">Ver foto completa</a>`
+                  );
+                }
+                return `<li>${parts.join('')}</li>`;
+              })
+              .join('');
+
+            return `
+              <tr>
+                <td>${participant.name || '—'}</td>
+                <td>${participant.email}</td>
+                <td><ul style="padding-left:1.2rem; margin:0;">${giftItems}</ul></td>
+                <td>${new Date(participant.updatedAt).toLocaleString()}</td>
+              </tr>
+            `;
+          })
+          .join('');
+
+        const table = `
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Opciones de regalo</th>
+                <th>Última actualización</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        `;
+
+        document.getElementById('participant-list').innerHTML = table;
+      }
+
+      function loadLastResults() {
+        if (!adminVerified || !adminIdentity) {
+          document.getElementById('last-results').innerHTML = '';
+          return;
+        }
+
+        google.script.run
+          .withSuccessHandler(function (data) {
+            if (!data) {
+              document.getElementById('last-results').innerHTML = '';
+              return;
+            }
+
+            const date = new Date(data.executedAt).toLocaleString();
+            const assignments = data.assignments
+              .map(function (assignment) {
+                return `<li><strong>${assignment.giver}</strong> → ${assignment.receiver}</li>`;
+              })
+              .join('');
+
+            document.getElementById('last-results').innerHTML = `
+              <div style="margin-bottom:1rem;">
+                <strong>Último sorteo:</strong> ${date}
+              </div>
+              <ul>${assignments}</ul>
+            `;
+          })
+          .withFailureHandler(function () {
+            document.getElementById('last-results').innerHTML = '';
+          })
+          .getLastResults(adminIdentity);
+      }
+
+      loadCountdown();
+    </script>
+  </body>
+</html>

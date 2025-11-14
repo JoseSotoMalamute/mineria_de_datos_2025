@@ -150,3 +150,47 @@ Estudiante de Ingeniería Física, entusiasta del análisis de datos y la físic
 ## 📝 Licencia
 
 Este proyecto es de uso educativo y académico.
+
+---
+
+## 🎁 Web App de Amigo Secreto (Google Apps Script)
+
+El repositorio ahora incluye un proyecto de **Google Apps Script** listo para desplegar como aplicación web y organizar un sorteo de amigo secreto.
+
+### 📂 Archivos principales
+
+| Archivo | Descripción |
+| --- | --- |
+| `appsscript.json` | Configuración del proyecto (zona horaria, permisos de la app web, runtime V8). |
+| `Code.gs` | Lógica del lado del servidor: registro de participantes, validación de administrador, sorteo y envío de correos. |
+| `Index.html` | Interfaz web para los participantes y panel del administrador con cuenta regresiva configurable. |
+
+### 🚀 Pasos para desplegar
+
+1. Abre la hoja de cálculo de Google que utilizarás para el sorteo (o crea una nueva) y asegúrate de que exista una pestaña llamada **`amigo_secreto`**.
+2. Desde la hoja, ve a `Extensiones → Apps Script` para abrir el proyecto vinculado.
+3. Reemplaza el contenido de los archivos por los de este repositorio (`appsscript.json`, `Code.gs` e `Index.html`).
+4. Verifica que el correo del administrador (`jsotopezoa@gmail.com`) y la contraseña (`c081208cC$`) estén correctamente definidos en `Code.gs` (constantes `ADMIN_EMAIL` y `ADMIN_PASSWORD`).
+5. En `Implementar → Implementar como aplicación web` selecciona:
+   - **Ejecutar la aplicación como:** Tú mismo.
+   - **Quién tiene acceso:** Cualquiera con el enlace (o restringido según tus necesidades).
+   - Durante la primera ejecución, autoriza los permisos solicitados para que el script pueda enviar correos mediante MailApp (no es necesario habilitar manualmente la API de Gmail).
+6. Guarda la implementación y copia la URL proporcionada para compartirla con los participantes.
+7. En la primera inscripción con foto se creará automáticamente en tu Google Drive una carpeta llamada **“Amigo Secreto - Imágenes”**, donde quedarán almacenadas todas las fotografías.
+
+### ✨ Funcionalidades clave
+
+- **Registro de participantes:** formulario para nombre, correo y tres ideas de regalo (≈ $20.000 CLP) con enlace de compra y carga directa de fotos desde el dispositivo.
+- **Cuenta regresiva visible:** el administrador configura la fecha límite y todos los visitantes ven el temporizador en tiempo real.
+- **Panel del administrador:** solo `jsotopezoa@gmail.com` puede validar acceso (ingresando correo y contraseña), ver listado de participantes, ajustar la cuenta regresiva y ejecutar el sorteo.
+- **Tema navideño renovado:** interfaz más grande, con colores festivos, efectos de nieve y tarjetas decorativas para destacar la experiencia de inscripción.
+- **Sorteo automático y notificaciones:** se asigna un amigo secreto a cada participante, enviando un correo con el destinatario y sus sugerencias de regalo. El administrador recibe un resumen del sorteo.
+- **Almacenamiento centralizado:** cada registro queda guardado en la hoja de cálculo `amigo_secreto` y las fotos se conservan en una carpeta de Google Drive accesible mediante enlace.
+
+> 💡 Puedes personalizar los textos y estilos modificando `Index.html` y ajustar la lógica del sorteo en `Code.gs` si necesitas más restricciones (por ejemplo, evitar que personas de un mismo grupo se asignen entre sí).
+
+### 🗂️ Estructura de los datos almacenados
+
+- La pestaña `amigo_secreto` guarda cada registro con columnas para correo, nombre, tres opciones de regalo, enlaces, URL pública de la foto y el identificador interno del archivo en Drive.
+- Las imágenes se suben automáticamente a la carpeta **“Amigo Secreto - Imágenes”** del administrador, con permisos de visualización para cualquier persona que tenga el enlace.
+- El sorteo borra el último resultado guardado cuando un participante actualiza su información, garantizando que siempre se vuelva a sortear antes de notificar.
